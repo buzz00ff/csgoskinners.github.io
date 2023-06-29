@@ -1,48 +1,267 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Moja Ruletka</title>
-    <style>
-        body {
-            background-color: #f44336; /* Czerwony kolor tła */
-            color: #ffffff; /* Biały kolor tekstu */
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
+  <head>
+  <meta charset="UTF-8">
+    <link rel="shortcut icon" type="image/x-icon" href="https://cpwebassets.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico">
 
-        h1 {
-            margin-top: 50px;
-        }
-
-        #roulette {
-            margin-top: 50px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #ffffff; /* Biały kolor przycisku */
-            color: #f44336; /* Czerwony kolor tekstu przycisku */
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #f44336; /* Czerwony kolor tła przycisku przy najechaniu */
-            color: #ffffff; /* Biały kolor tekstu przycisku przy najechaniu */
-        }
-    </style>
+  <script>
+  window.console = window.console || function(t) {};
+</script>
+<title>CS:GO SKINNERS | Jackpot skins</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+   <style>
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+    <script src="script.js"></script>
+  <script src="winwheel.min.js"></script>
 </head>
 <body>
-    <h1>Moja Ruletka</h1>
-    <div id="roulette">
-        <p>Tutaj będzie ruletka.</p>
-        <button id="spinButton">Kręć</button>
+<div id="admin-panel" style="display: none;">
+    <h2>Panel administracyjny</h2>
+    <input type="password" id="password-input" placeholder="Wprowadź hasło">
+    <button id="login-button">Zaloguj</button>
+    <div id="user-list">
+      <!-- Tutaj wyświetlane będą informacje o użytkownikach -->
     </div>
+  </div>
+  <script src="admino.js"></script>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#">A</a></li>
+        <li><a href="#">B</a></li>
+        <li><a href="#">C</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <script src="script.js"></script>
+  <div class="container">
+    <div class="row">
+      <div class="previous-winners">
+        <h2>Previous winners</h2>
+        <!-- Tutaj możesz dodać listę poprzednich zwycięzców -->
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Games today</th>
+              <th>Unique players today</th>
+              <th>Items raffled today</th>
+              <th>Biggest win</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>10</td>
+              <td>50</td>
+              <td>100</td>
+              <td>500</td>
+            </tr>
+            <!-- Tutaj możesz dodać inne wiersze tabeli z danymi -->
+          </tbody>
+        </table>
+      </div>
+      <div id="login-container">
+    <button id="login-button">Zaloguj się przez Steam</button>
+        <script src="steamlog.js"></script>
+  </div>
+    </div>
+  </div>
+  <div class="roulette-container">
+  <h2>Roulette</h2>
+  <input type="button" value="spin" style="float:center;" id="spin">
+<canvas id="canvas" width="500" height="500"></canvas>
+    <script src="https://cpwebassets.codepen.io/assets/common/stopExecutionOnTimeout-2c7831bb44f98c1391d6a4ffda0e1fd302503391ca806e7fcc7b9b87197aec26.js"></script>
+
+
+      <script id="rendered-js">
+var options = ["$100", "$10", "$25", "$250", "$30", "$1000", "$1", "$200", "$45", "$500", "$5", "$20", "Lose", "$1000000", "Lose", "$350", "$5", "$99"];
+
+var startAngle = 0;
+var arc = Math.PI / (options.length / 2);
+var spinTimeout = null;
+var spinDuration = 5000; // Czas trwania obrotu (w milisekundach)
+var spinInterval = 15000; // Interwał między automatycznymi obrotami (w milisekundach)
+
+var ctx;
+
+document.getElementById("spin").addEventListener("click", spin);
+
+function byte2Hex(n) {
+  var nybHexString = "0123456789ABCDEF";
+  return String(nybHexString.substr(n >> 4 & 0x0F, 1)) + nybHexString.substr(n & 0x0F, 1);
+}
+
+function RGB2Color(r, g, b) {
+  return '#' + byte2Hex(r) + byte2Hex(g) + byte2Hex(b);
+}
+
+function getColor(item, maxitem) {
+  var phase = 0;
+  var center = 128;
+  var width = 127;
+  var frequency = Math.PI * 2 / maxitem;
+
+  red = Math.sin(frequency * item + 2 + phase) * width + center;
+  green = Math.sin(frequency * item + 0 + phase) * width + center;
+  blue = Math.sin(frequency * item + 4 + phase) * width + center;
+
+  return RGB2Color(red, green, blue);
+}
+
+function drawRouletteWheel() {
+  var canvas = document.getElementById("canvas");
+  if (canvas.getContext) {
+    var outsideRadius = 200;
+    var textRadius = 160;
+    var insideRadius = 125;
+
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 500, 500);
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+
+    ctx.font = 'bold 12px Helvetica, Arial';
+
+    for (var i = 0; i < options.length; i++) {
+      var angle = startAngle + i * arc;
+      ctx.fillStyle = getColor(0, options.length); // Ustawienie jednolitego koloru dla wszystkich pól
+
+      ctx.beginPath();
+      ctx.arc(250, 250, outsideRadius, angle, angle + arc, false);
+      ctx.arc(250, 250, insideRadius, angle + arc, angle, true);
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.save();
+      ctx.shadowOffsetX = -1;
+      ctx.shadowOffsetY = -1;
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "rgb(220,220,220)";
+      ctx.fillStyle = "black";
+      ctx.translate(
+        250 + Math.cos(angle + arc / 2) * textRadius,
+        250 + Math.sin(angle + arc / 2) * textRadius
+      );
+      ctx.rotate(angle + arc / 2 + Math.PI / 2);
+      var text = options[i];
+      ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+      ctx.restore();
+    }
+
+    //Arrow
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(250 - 4, 250 - (outsideRadius + 5));
+    ctx.lineTo(250 + 4, 250 - (outsideRadius + 5));
+    ctx.lineTo(250 + 4, 250 - (outsideRadius - 5));
+    ctx.lineTo(250 + 9, 250 - (outsideRadius - 5));
+    ctx.lineTo(250 + 0, 250 - (outsideRadius - 13));
+    ctx.lineTo(250 - 9, 250 - (outsideRadius - 5));
+    ctx.lineTo(250 - 4, 250 - (outsideRadius - 5));
+    ctx.lineTo(250 - 4, 250 - (outsideRadius + 5));
+    ctx.fill();
+  }
+}
+
+function spin() {
+  disableButton();
+  spinAngleStart = Math.random() * 10 + 10;
+  spinTime = 0;
+  spinTimeTotal = spinDuration + Math.random() * 3 + 4 * 1000;
+  rotateWheel();
+}
+
+function rotateWheel() {
+  spinTime += 30;
+  if (spinTime >= spinTimeTotal) {
+    stopRotateWheel();
+    enableButton();
+    return;
+  }
+  var spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+  startAngle += spinAngle * Math.PI / 180;
+  drawRouletteWheel();
+  spinTimeout = setTimeout(rotateWheel, 30);
+}
+
+function stopRotateWheel() {
+  clearTimeout(spinTimeout);
+  var degrees = startAngle * 180 / Math.PI + 90;
+  var arcd = arc * 180 / Math.PI;
+  var index = Math.floor((360 - degrees % 360) / arcd);
+  ctx.save();
+  ctx.font = 'bold 30px Helvetica, Arial';
+  var text = options[index];
+  ctx.fillText(text, 250 - ctx.measureText(text).width / 2, 250 + 10);
+  ctx.restore();
+}
+
+function easeOut(t, b, c, d) {
+  var ts = (t /= d) * t;
+  var tc = ts * t;
+  return b + c * (tc + -3 * ts + 3 * t);
+}
+
+function disableButton() {
+  document.getElementById("spin").disabled = true;
+}
+
+function enableButton() {
+  document.getElementById("spin").disabled = false;
+}
+
+drawRouletteWheel();
+rotateWheel();
+setInterval(rotateWheel, spinInterval);
+
+    </script>
+  <div class="roulette-wheel" id="myWheel"></div>
+  <button id="spin-button">Spin</button>
+</div>
+
+  <script>
+      // Inicjalizacja ruletki
+var wheel = new Winwheel({
+  canvasId: 'myWheel',
+  numSegments: 8,
+  outerRadius: 150,
+  innerRadius: 50,
+  segments: [
+    { fillStyle: '#FF0000', text: 'Wartość 1' },
+    { fillStyle: '#00FF00', text: 'Wartość 2' },
+    { fillStyle: '#0000FF', text: 'Wartość 3' },
+    // Dodaj inne wartości
+  ],
+  animation: {
+    type: 'spinToStop',
+    duration: 5,
+    spins: 8,
+    callbackFinished: 'showResult()'
+  }
+});
+
+// Funkcja rozpoczynająca animację ruletki
+function spinRoulette() {
+  wheel.startAnimation();
+}
+
+// Funkcja wyświetlająca wynik ruletki
+function showResult() {
+  var winningSegment = wheel.getIndicatedSegment();
+  console.log('Wygrana wartość:', winningSegment.text);
+}
+
+// Obsługa kliknięcia przycisku
+var spinButton = document.getElementById('spin-button');
+spinButton.addEventListener('click', spinRoulette);
+
+  </script>
 </body>
 </html>
